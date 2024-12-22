@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>Nueva Venta</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <h2>Nueva Venta</h2>
+
+    <form th:action="@{/ventas/guardar}" method="post">
+        <div class="form-group">
+            <label>Cliente ID:</label>
+            <input type="number" name="clienteId" class="form-control" required>
+        </div>
+
+        <div id="productos-container">
+            <div class="producto-item mb-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label>Producto:</label>
+                        <select name="detalles[0].productoId" class="form-control" required>
+                            <option value="">Seleccione un producto</option>
+                            <option th:each="producto : ${productos}"
+                                    th:value="${producto.id}"
+                                    th:text="${producto.nombre + ' - S/ ' + producto.precio}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Cantidad:</label>
+                        <input type="number" name="detalles[0].cantidad"
+                               class="form-control" min="1" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-secondary mb-3" onclick="agregarProducto()">
+            Agregar Producto
+        </button>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Guardar Venta</button>
+            <a th:href="@{/ventas/lista}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+
+    <script>
+        let productoCount = 1;
+
+        function agregarProducto() {
+            const container = document.getElementById('productos-container');
+            const div = document.createElement('div');
+            div.className = 'producto-item mb-3';
+            div.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Producto:</label>
+                            <select name="detalles[${productoCount}].productoId" class="form-control" required>
+                                <option value="">Seleccione un producto</option>
+                                ${document.querySelector('select[name="detalles[0].productoId"]').innerHTML}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Cantidad:</label>
+                            <input type="number" name="detalles[${productoCount}].cantidad"
+                                   class="form-control" min="1" required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger mt-4"
+                                    onclick="this.parentElement.parentElement.parentElement.remove()">
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            container.appendChild(div);
+            productoCount++;
+        }
+    </script>
+</div>
+</body>
+</html>

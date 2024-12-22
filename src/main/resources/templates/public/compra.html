@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Compra de Producto - SMART</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 15px;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 1.5rem;
+        }
+        .form-control {
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e9ecef;
+        }
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        .card-body {
+            padding: 2rem;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        .product-summary {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <h2><i class="fas fa-shopping-cart"></i> Finalizar Compra</h2>
+        <p class="mb-0">Complete los detalles de su pedido</p>
+    </div>
+</div>
+<p class="mb-0">
+    <i class="fas fa-user-circle"></i>
+    Bienvenido, <span th:text="${session.usuario}" class="fw-bold"></span>
+</p>
+<div class="container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-credit-card me-2"></i>
+                        Detalles de Pago
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Resumen del producto -->
+                    <div class="product-summary">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <img th:if="${producto.imagen != null}"
+                                     th:src="@{'data:image/jpeg;base64,' + ${producto.imagen}}"
+                                     class="img-fluid rounded"
+                                     style="width: 80px; height: 80px; object-fit: cover;"
+                                     alt="Producto">
+                                <img th:unless="${producto.imagen != null}"
+                                     src="https://via.placeholder.com/80"
+                                     class="img-fluid rounded"
+                                     alt="Producto">
+                            </div>
+                            <div class="col">
+                                <h5 class="mb-1" th:text="${producto.nombre}">Nombre del Producto</h5>
+                                <p class="mb-0 text-muted" th:text="${producto.descripcion}">Descripción</p>
+                            </div>
+                            <div class="col-auto">
+                                <h4 class="mb-0 text-primary" th:text="'S/ ' + ${producto.precio}">Precio</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="formCompra" th:action="@{/public/procesar-compra}" method="post">
+                        <input type="hidden" name="productoId" th:value="${producto.id}">
+
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-user me-2"></i>Nombre del Cliente
+                            </label>
+                            <input type="text" name="cliente" class="form-control"
+                                   placeholder="Ingrese su nombre completo" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-credit-card me-2"></i>Número de Tarjeta
+                            </label>
+                            <input type="text" name="tarjeta" class="form-control"
+                                   placeholder="1234567890123456"
+                                   pattern="\d{16}"
+                                   maxlength="16"
+                                   title="Ingrese los 16 dígitos de su tarjeta" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar me-2"></i>Fecha de Vencimiento
+                                </label>
+                                <input type="text" name="fechaVenc" class="form-control"
+                                       placeholder="MM/YY"
+                                       pattern="(0[1-9]|1[0-2])/\d{2}"
+                                       maxlength="5"
+                                       title="Formato MM/YY" required>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-lock me-2"></i>CVV
+                                </label>
+                                <input type="text" name="cvv" class="form-control"
+                                       placeholder="123"
+                                       pattern="\d{3}"
+                                       maxlength="3"
+                                       title="Ingrese 3 dígitos" required>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a th:href="@{/public/catalogo}" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-arrow-left me-2"></i>Volver
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart me-2"></i>Finalizar Compra
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.all.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#formCompra').on('submit', function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: '¿Confirmar compra?',
+                text: "¿Está seguro de realizar esta compra?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3498db',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-check me-2"></i>Sí, comprar',
+                cancelButtonText: '<i class="fas fa-times me-2"></i>Cancelar',
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Procesando compra',
+                        html: 'Por favor espere...',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading()
+                        }
+                    });
+
+                    $.ajax({
+                        url: $(this).attr('action'),
+                        type: 'POST',
+                        data: $(this).serialize(),
+                        success: function(response) {
+                            Swal.fire({
+                                title: '¡Compra exitosa!',
+                                text: 'Su compra se ha realizado correctamente',
+                                icon: 'success',
+                                confirmButtonColor: '#3498db',
+                                confirmButtonText: 'Aceptar'
+                            }).then((result) => {
+                                window.location.href = '/public/catalogo';
+                            });
+                        },
+                        error: function() {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'Hubo un problema al procesar su compra',
+                                icon: 'error',
+                                confirmButtonColor: '#3498db',
+                                confirmButtonText: 'Aceptar'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

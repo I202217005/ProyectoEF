@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>Lista de Ventas</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <h2>Lista de Ventas</h2>
+    <a th:href="@{/ventas/form}" class="btn btn-primary mb-3">Nueva Venta</a>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Fecha</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="venta : ${ventas}">
+            <td th:text="${venta.id}"></td>
+            <td th:text="${venta.clienteId}"></td>
+            <td th:text="${#temporals.format(venta.fechaVenta, 'dd/MM/yyyy HH:mm')}"></td>
+            <td th:text="${'S/ ' + venta.total}"></td>
+            <td th:text="${venta.estado}"></td>
+            <td>
+                <a th:href="@{/ventas/detalle/{id}(id=${venta.id})}"
+                   class="btn btn-info btn-sm">Ver Detalle</a>
+                <a th:if="${venta.estado == 'COMPLETADA'}"
+                   th:href="@{/ventas/cancelar/{id}(id=${venta.id})}"
+                   class="btn btn-danger btn-sm"
+                   onclick="return confirm('¿Estás seguro de cancelar esta venta?')">
+                    Cancelar
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

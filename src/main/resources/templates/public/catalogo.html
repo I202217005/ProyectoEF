@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Catálogo de Celulares - SMART</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-smart {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            padding: 1rem 0;
+        }
+        .hero-section {
+            background: linear-gradient(to right, #2c3e50, #3498db);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+        .product-card {
+            border: none;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .product-image {
+            height: 200px;
+            object-fit: contain;
+            padding: 1rem;
+            background: #f8f9fa;
+        }
+        .price-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .stock-status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        .btn-smart {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            border: none;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .btn-smart:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-4">
+                    <i class="fas fa-mobile-alt"></i> SMART
+                </h1>
+                <p class="lead">Descubre nuestra colección de smartphones</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <div class="text-light">
+                    <p class="mb-0">
+                        <i class="fas fa-user-circle"></i>
+                        Bienvenido, <span th:text="${session.usuario}" class="fw-bold"></span>
+                    </p>
+                    <p class="mb-0">
+                        <i class="far fa-clock"></i>
+                        <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}"></span>
+                    </p>
+                    <p class="mb-0">
+                        <a href="/logout" class="text-light"><i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container mb-5">
+    <!-- Filtros -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group">
+                            <span class="input-group-text bg-white">
+                                <i class="fas fa-search"></i>
+                            </span>
+                        <input type="text" class="form-control" placeholder="Buscar productos...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select">
+                        <option selected>Ordenar por...</option>
+                        <option>Precio: Menor a Mayor</option>
+                        <option>Precio: Mayor a Menor</option>
+                        <option>Más Recientes</option>
+                    </select>
+                </div>
+                <div class="col-md-4 text-end">
+                        <span class="text-muted">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span th:text="${#lists.size(productos)}"></span> productos encontrados
+                        </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos -->
+    <div class="row g-4">
+        <div class="col-md-4" th:each="producto : ${productos}">
+            <div class="card product-card">
+                <!-- Imagen del producto -->
+                <img th:if="${producto.imagen != null}"
+                     th:src="@{'data:image/jpeg;base64,' + ${producto.imagen}}"
+                     class="product-image"
+                     alt="Producto">
+                <img th:unless="${producto.imagen != null}"
+                     src="https://via.placeholder.com/300x300?text=Sin+Imagen"
+                     class="product-image"
+                     alt="Sin imagen">
+
+                <!-- Badge de precio -->
+                <div class="price-badge">
+                    S/ <span th:text="${#numbers.formatDecimal(producto.precio, 0, 'COMMA', 2, 'POINT')}"></span>
+                </div>
+
+                <!-- Badge de stock -->
+                <div class="stock-status">
+                        <span class="badge"
+                              th:classappend="${producto.stock > 0 ? 'bg-success' : 'bg-danger'}"
+                              th:text="${producto.stock > 0 ? 'Disponible' : 'Agotado'}">
+                        </span>
+                </div>
+
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${producto.nombre}"></h5>
+                    <p class="card-text text-muted" th:text="${producto.descripcion}"></p>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted" th:if="${producto.stock > 0}">
+                            Stock: <span th:text="${producto.stock}"></span> unidades
+                        </small>
+                        <a th:if="${producto.stock > 0}"
+                           th:href="@{/public/comprar/{id}(id=${producto.id})}"
+                           class="btn btn-smart">
+                            <i class="fas fa-shopping-cart me-2"></i>Comprar
+                        </a>
+                        <button th:if="${producto.stock <= 0}"
+                                class="btn btn-secondary" disabled>
+                            <i class="fas fa-ban me-2"></i>Agotado
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-light py-4 mt-auto">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <h5><i class="fas fa-mobile-alt"></i> SMART</h5>
+                <p class="mb-0">Tu tienda de confianza para smartphones</p>
+            </div>
+            <div class="col-md-4">
+                <h5>Contacto</h5>
+                <p class="mb-0">
+                    <i class="fas fa-phone me-2"></i>(01) 555-0123<br>
+                    <i class="fas fa-envelope me-2"></i>contacto@smart.com
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h5>Síguenos</h5>
+                <div class="d-flex gap-3">
+                    <a href="#" class="text-light"><i class="fab fa-facebook fa-lg"></i></a>
+                    <a href="#" class="text-light"><i class="fab fa-instagram fa-lg"></i></a>
+                    <a href="#" class="text-light"><i class="fab fa-twitter fa-lg"></i></a>
+                </div>
+            </div>
+        </div>
+        <hr class="my-4">
+        <div class="text-center">
+            <small>&copy; 2024 SMART. Todos los derechos reservados.</small>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
